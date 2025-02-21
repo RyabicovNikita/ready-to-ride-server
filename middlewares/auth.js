@@ -1,6 +1,6 @@
 import { pool } from "../config/db.js";
 import { ERRORS } from "../constants/errors.js";
-import { verifyToken } from "../helpers/token.js";
+import { verifyToken } from "../helpers/index.js";
 
 async function auth(req, res, next) {
   if (!req.cookies.token) {
@@ -14,6 +14,7 @@ async function auth(req, res, next) {
       res.send({ error: ERRORS.NOT_AUTH });
       return;
     }
+    console.log(user);
     req.user = user;
   } catch (e) {
     console.error(e.message);

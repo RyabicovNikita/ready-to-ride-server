@@ -17,7 +17,12 @@
     "express": "^4.21.2",
     "express-validator": "^7.2.1",
     "jsonwebtoken": "^9.0.2",
+    "luxon": "^3.5.0",
     "nodemon": "^3.1.9",
-    "pg": "^8.13.3"
+    "pg": "^8.13.3",
+    "prettier": "^3.5.1"
+  },
+  "devDependencies": {
+    "globals": "^16.0.0"
   }
 }
