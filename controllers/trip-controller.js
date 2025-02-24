@@ -1,6 +1,25 @@
 import { DateTime } from "luxon";
 import { pool } from "../config/db.js";
 import { DB_ERROR } from "../constants/dbCodeErrors.js";
+import { mapTrip } from "../mappers/mapTrip.js";
+
+export const getTrips = async ({ onlyUserTrips, userId, filter }) => {
+  const trips = await pool.query(
+    `SELECT trips.*, 
+    pass.first_name AS pass_firstName, 
+    pass.last_name AS pass_lastName, 
+    driver.first_name AS driver_firstName, 
+    driver.last_name AS driver_lastName 
+    FROM trips 
+    LEFT JOIN users AS pass ON trips.created_by = pass.id 
+    LEFT JOIN users AS driver ON trips.driver = driver.id 
+    ${onlyUserTrips ? "WHERE created_by = $1" : ""}`,
+    onlyUserTrips ? [userId] : []
+  );
+  if (onlyUserTrips && trips.rowCount === 0) throw Error("У вас ещё не было поездок");
+  if (trips.rowCount === 0) throw Error("Поездки не найдены :(");
+  return trips.rows.map((trip) => mapTrip(trip));
+};
 
 export const createTrip = async ({
   fromWhere,

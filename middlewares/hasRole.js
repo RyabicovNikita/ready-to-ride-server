@@ -1,4 +1,4 @@
-module.exports = function (...roles) {
+export function hasRole(...roles) {
   return (req, res, next) => {
     if (!roles.includes(req.user.role)) {
       res.send({ error: "Access denied" });
@@ -6,4 +6,4 @@ module.exports = function (...roles) {
     }
     next();
   };
-};
+}

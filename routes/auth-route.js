@@ -6,7 +6,7 @@ const router = Router({ mergeParams: true });
 
 router.post("/register", async (req, res) => {
   try {
-    const { user, token } = await register({
+    const { user, accessToken } = await register({
       email: req.body.email,
       firstName: req.body.firstName,
       lastName: req.body.lastName,
@@ -15,7 +15,7 @@ router.post("/register", async (req, res) => {
     });
 
     //Сразу логиним пользователя
-    res.cookie("token", token, { httpOnly: true }).send({ body: mapAuthUser(user) });
+    res.cookie("token", accessToken, { httpOnly: true }).send({ body: mapAuthUser(user) });
   } catch (e) {
     res.status(409).send({ error: e.message || "Unknown error" });
   }
@@ -23,9 +23,8 @@ router.post("/register", async (req, res) => {
 
 router.post("/login", async (req, res) => {
   try {
-    const { user, token } = await login(req.body.email, req.body.password);
-
-    res.cookie("token", token, { httpOnly: true }).send({ body: mapAuthUser(user) });
+    const { user, accessToken } = await login(req.body.email, req.body.password);
+    res.cookie("token", accessToken, { httpOnly: true }).send({ body: mapAuthUser(user) });
   } catch (e) {
     res.status(401).send({ error: e.message || "Unknown error" });
   }

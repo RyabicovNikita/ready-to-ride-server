@@ -1,10 +1,10 @@
 import { Router } from "express";
 import authRoutes from "./auth-route.js";
-import tripRoutes from "./trip-route.js";
+import tripsRoutes from "./trips-route.js";
 
 const router = Router({ mergeParams: true });
 
 router.use("/", authRoutes);
-router.use("/trip", tripRoutes);
+router.use("/trips", tripsRoutes);
 
 export default router;

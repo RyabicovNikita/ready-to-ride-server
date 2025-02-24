@@ -22,7 +22,7 @@ export async function register({ email, password, firstName, lastName, isDriver 
     throw Error(DB_ERROR[res.error.code] || "База данных вернула некорректный ответ");
   }
   const user = res.rows[0];
-  const accessToken = generateJWT({ id: user.id }, ACCESS_SECRET_KEY, "1h");
+  const accessToken = generateJWT(user.id, ACCESS_SECRET_KEY, "1h");
   return { accessToken, user };
 }
 
@@ -34,7 +34,7 @@ export async function login(email, password) {
 
   if (!isPasswordMatch) throw Error("Неверный пароль");
 
-  const accessToken = generateJWT({ id: user.id }, ACCESS_SECRET_KEY, "1h");
+  const accessToken = generateJWT(user.id, ACCESS_SECRET_KEY, "1h");
 
   return { accessToken, user };
 }
