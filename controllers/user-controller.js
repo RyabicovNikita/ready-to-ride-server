@@ -6,20 +6,19 @@ import { generateJWT } from "../helpers/index.js";
 
 const ACCESS_SECRET_KEY = process.env.ACCESS_TOKEN;
 
-export async function register(email, login, password, isDriver) {
+export async function register({ email, password, firstName, lastName, isDriver }) {
   if (!password) throw Error("Поле пароля не заполнено");
   const passwordHash = await hash(password, 10);
   const res = await pool
-    .query("INSERT INTO users (email, login, password) VALUES ($1, $2, $3, $4) RETURNING *", [
-      email,
-      login,
-      isDriver,
-      passwordHash,
-    ])
+    .query(
+      "INSERT INTO users (email, password, first_name, last_name, isdriver) VALUES ($1, $2, $3, $4, $5) RETURNING *",
+      [email, passwordHash, firstName, lastName, isDriver]
+    )
     .catch((e) => ({
       error: e,
     }));
   if (res.error) {
+    if (!DB_ERROR[res.error.code]) console.error(res.error);
     throw Error(DB_ERROR[res.error.code] || "База данных вернула некорректный ответ");
   }
   const user = res.rows[0];

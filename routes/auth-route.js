@@ -6,7 +6,13 @@ const router = Router({ mergeParams: true });
 
 router.post("/register", async (req, res) => {
   try {
-    const { user, token } = await register(req.body.email, req.body.login, req.body.password, req.body.isDriver);
+    const { user, token } = await register({
+      email: req.body.email,
+      firstName: req.body.firstName,
+      lastName: req.body.lastName,
+      password: req.body.password,
+      isDriver: req.body.isDriver,
+    });
 
     //Сразу логиним пользователя
     res.cookie("token", token, { httpOnly: true }).send({ body: mapAuthUser(user) });

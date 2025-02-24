@@ -3,7 +3,7 @@ import { formatUTCDate } from "../helpers/index.js";
 export const mapAuthUser = (user) => ({
   id: user.id,
   role: user.role,
-  login: user.login,
+  userName: user.first_name + " " + user.last_name ?? "",
   registed_at: formatUTCDate(user.created_at, "dd.MM.yyyy"),
 });
 export const mapCardUser = (user) => ({
