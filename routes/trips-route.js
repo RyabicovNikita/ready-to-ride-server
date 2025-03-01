@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createTrip, getTrips, getTripsByIDs } from "../controllers/index.js";
+import { addDriverInTrips, createTrip, getTrips, getTripsByIDs } from "../controllers/index.js";
 import auth from "../middlewares/auth.js";
 
 const router = Router({ mergeParams: true });
@@ -20,8 +20,8 @@ router.post("/", auth, async (req, res) => {
   }
 });
 
-router.post("/getByIDs", auth, async (req, res) => {
-  const idArray = req.body?.idArray;
+router.post("/getByIDs", auth, async ({ body }, res) => {
+  const idArray = body?.idArray;
   const responsible = await getTripsByIDs(idArray);
   if (responsible.error) {
     res.status(responsible.code ?? 500).send({
@@ -47,6 +47,15 @@ router.post("/new", async ({ body }, res) => {
       status: body.status,
     });
     res.send({ body: newTrip });
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+
+router.post("/confirmDriver", auth, async ({ body }, res) => {
+  try {
+    await addDriverInTrips(body.idArray, body.driverID);
+    res.status(200).send({});
   } catch (e) {
     res.status(500).send({ error: e.message });
   }
