@@ -2,6 +2,7 @@ import { FORMATES_DATE } from "../constants/index.js";
 import { formatUTCDate } from "../helpers/index.js";
 
 export const mapTrip = (trip) => ({
+  id: trip.id,
   created_at: formatUTCDate(trip.created_at),
   creator: {
     id: trip.created_by,

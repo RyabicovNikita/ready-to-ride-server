@@ -4,6 +4,7 @@ export const mapAuthUser = (user) => ({
   id: user.id,
   role: user.role,
   userName: user.first_name + " " + user.last_name ?? "",
+  isDriver: user.isdriver,
   registed_at: formatUTCDate(user.created_at, "dd.MM.yyyy"),
 });
 export const mapCardUser = (user) => ({

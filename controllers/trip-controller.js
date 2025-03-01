@@ -16,8 +16,25 @@ export const getTrips = async ({ onlyUserTrips, userId, filter }) => {
     ${onlyUserTrips ? "WHERE created_by = $1" : ""}`,
     onlyUserTrips ? [userId] : []
   );
-  if (onlyUserTrips && trips.rowCount === 0) throw Error("У вас ещё не было поездок");
-  if (trips.rowCount === 0) throw Error("Поездки не найдены :(");
+  if (onlyUserTrips && trips.rowCount === 0) return { code: 404, error: "Активных поездок нет" };
+  if (trips.rowCount === 0) return { code: 404, isFilterError: true, error: "Не найдено ни одной поездки :(" };
+  return trips.rows.map((trip) => mapTrip(trip));
+};
+
+export const getTripsByIDs = async (idArray) => {
+  const trips = await pool.query(
+    `SELECT trips.*, 
+    pass.first_name AS pass_firstName, 
+    pass.last_name AS pass_lastName, 
+    driver.first_name AS driver_firstName, 
+    driver.last_name AS driver_lastName 
+    FROM trips 
+    LEFT JOIN users AS pass ON trips.created_by = pass.id 
+    LEFT JOIN users AS driver ON trips.driver = driver.id WHERE trips.id = ANY($1)`,
+    [idArray]
+  );
+
+  if (trips.rowCount === 0) return { code: 404, error: "У вас нет не подтверждённых поездок! :)" };
   return trips.rows.map((trip) => mapTrip(trip));
 };
 

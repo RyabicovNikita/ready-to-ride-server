@@ -1,13 +1,35 @@
 import { Router } from "express";
-import { createTrip, getTrips } from "../controllers/index.js";
+import { createTrip, getTrips, getTripsByIDs } from "../controllers/index.js";
 import auth from "../middlewares/auth.js";
 
 const router = Router({ mergeParams: true });
 
 router.post("/", auth, async (req, res) => {
+  const isOnlyUserTrips = req.body?.onlyUserTrips;
   try {
-    const trips = await getTrips({ onlyUserTrips: req.body?.onlyUserTrips, userId: req.user.id });
-    res.send({ body: trips });
+    const responsible = await getTrips({ onlyUserTrips: isOnlyUserTrips, userId: req.user.id });
+    if (responsible.error) {
+      res.status(responsible.code ?? 500).send({
+        code: responsible.code ?? 500,
+        error: responsible.error,
+        isFilterError: responsible.isFilterError ?? false,
+      });
+    } else res.send({ body: responsible });
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+
+router.post("/getByIDs", auth, async (req, res) => {
+  const idArray = req.body?.idArray;
+  const responsible = await getTripsByIDs(idArray);
+  if (responsible.error) {
+    res.status(responsible.code ?? 500).send({
+      code: responsible.code ?? 500,
+      error: responsible.error,
+    });
+  } else res.send({ body: responsible });
+  try {
   } catch (e) {
     res.status(500).send({ error: e.message });
   }

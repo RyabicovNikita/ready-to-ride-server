@@ -6,5 +6,6 @@ const router = Router({ mergeParams: true });
 
 router.use("/", authRoutes);
 router.use("/trips", tripsRoutes);
+router.use("/myTrips", tripsRoutes);
 
 export default router;
