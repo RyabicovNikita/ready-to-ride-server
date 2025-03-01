@@ -18,10 +18,11 @@ export const getTrips = async ({ onlyUserTrips, userId, filter }) => {
   );
   if (onlyUserTrips && trips.rowCount === 0) return { code: 404, error: "Активных поездок нет" };
   if (trips.rowCount === 0) return { code: 404, isFilterError: true, error: "Не найдено ни одной поездки :(" };
+
   return trips.rows.map((trip) => mapTrip(trip));
 };
 
-export const getTripsByIDs = async (idArray) => {
+export const getTripsByIDs = async (arrayIDs) => {
   const trips = await pool.query(
     `SELECT trips.*, 
     pass.first_name AS pass_firstName, 
@@ -31,7 +32,7 @@ export const getTripsByIDs = async (idArray) => {
     FROM trips 
     LEFT JOIN users AS pass ON trips.created_by = pass.id 
     LEFT JOIN users AS driver ON trips.driver = driver.id WHERE trips.id = ANY($1)`,
-    [idArray]
+    [arrayIDs]
   );
 
   if (trips.rowCount === 0) return { code: 404, error: "У вас нет не подтверждённых поездок! :)" };
@@ -68,4 +69,14 @@ export const createTrip = async ({
   }
   const trip = res.rows[0];
   return trip;
+};
+
+export const addDriverInTrips = async (arrayIDs, driverID) => {
+  const res = await pool.query("UPDATE trips SET driver=$1 WHERE id = ANY($2)", [driverID, arrayIDs]).catch((e) => ({
+    error: e,
+  }));
+  if (res.error) {
+    if (!DB_ERROR[res.error.code]) console.error(res.error);
+    throw Error(DB_ERROR[res.error.code] || "База данных вернула некорректный ответ");
+  }
 };
