@@ -6,8 +6,9 @@ const router = Router({ mergeParams: true });
 
 router.post("/", auth, async (req, res) => {
   const isOnlyUserTrips = req.body?.onlyUserTrips;
+  const filter = req.body?.filter;
   try {
-    const responsible = await getTrips({ onlyUserTrips: isOnlyUserTrips, userId: req.user.id });
+    const responsible = await getTrips({ onlyUserTrips: isOnlyUserTrips, userId: req.user.id, filter });
     if (responsible.error) {
       res.status(responsible.code ?? 500).send({
         code: responsible.code ?? 500,

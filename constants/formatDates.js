@@ -1,4 +1,4 @@
 export const FORMATES_DATE = {
-  DATE: "yy.MM.yyyy",
+  DATE: "dd.MM.yyyy",
   TIME: "HH:mm:ss",
 };

@@ -19,7 +19,7 @@ async function auth(req, res, next) {
     }
     req.user = user;
   } catch (e) {
-    res.send(401, { error: e.message });
+    res.send({ error: e.message });
     return;
   }
 
