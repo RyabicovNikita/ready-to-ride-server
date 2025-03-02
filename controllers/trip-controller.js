@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { pool } from "../config/db.js";
-import { DB_ERROR } from "../constants/dbCodeErrors.js";
+import { DB_ERROR, SELECTED_VALUES } from "../constants/index.js";
 import { mapTrip } from "../mappers/mapTrip.js";
 
 export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) => {
@@ -12,7 +12,7 @@ export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) 
     const valueArr = [];
     return {
       addWhereCondition: (value, bdFieldName, sign = "=") => {
-        if (!value || value === "Не выбран") return;
+        if (!value || value === SELECTED_VALUES.NOT_SELECT) return;
         if (value === "NULL") {
           filter += !filter ? ` WHERE ${bdFieldName} IS NULL` : ` AND ${bdFieldName} IS NULL`;
           return;
@@ -47,16 +47,15 @@ export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) 
     };
   };
 
-  // let filter = "";
-  // if (onlyUserTrips) filter += ` WHERE created_by=$1`;
-  // if (fromWhere && fromWhere !== "Не выбран") filter += ` WHERE fromwhere=$2`;
+  const isNotDriverSelected = notDriver !== SELECTED_VALUES.NOT_SELECT;
   const filter = createFilter();
+
   filter.addWhereCondition(onlyUserTrips ? userId : null, "created_by");
   filter.addWhereCondition(fromWhere, "fromwhere");
   filter.addWhereCondition(toWhere, "towhere");
   filter.addWhereCondition(dateTrip, "datetime::date");
   filter.addWhereCondition(timeTrip, "datetime::time");
-  filter.addWhereCondition(notDriver ? "NULL" : 0, "driver", notDriver ? "IS" : ">");
+  if (isNotDriverSelected) filter.addWhereCondition(notDriver ? "NULL" : -1, "driver", ">");
   filter.addFromToCondition(priceFrom, priceTo, "totalprice");
   filter.addFromToCondition(numberPeopleFrom, numberPeopleTo, "numberpeople");
 
