@@ -72,10 +72,6 @@ export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) 
   ${userFilter} ORDER BY created_at DESC
   `;
 
-  console.log(bodyQuery);
-  console.log(valuesQuery);
-  console.log(bodyQuery);
-  console.log(valuesQuery);
   const trips = await pool.query(bodyQuery, valuesQuery);
   if (onlyUserTrips && trips.rowCount === 0) return { code: 404, error: "Активных поездок нет" };
   if (trips.rowCount === 0) return { code: 404, isFilterError: true, error: "Не найдено ни одной поездки :(" };
@@ -96,7 +92,7 @@ export const getTripsByIDs = async (arrayIDs) => {
     [arrayIDs]
   );
 
-  if (trips.rowCount === 0) return { code: 404, error: "У вас нет не подтверждённых поездок! :)" };
+  if (trips.rowCount === 0) throw Error("Не найдено");
   return trips.rows.map((trip) => mapTrip(trip));
 };
 

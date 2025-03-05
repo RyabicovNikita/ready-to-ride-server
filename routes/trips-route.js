@@ -62,4 +62,14 @@ router.post("/confirmDriver", auth, async ({ body }, res) => {
   }
 });
 
+router.post("/:id", auth, async (req, res) => {
+  try {
+    const tripArr = await getTripsByIDs([req.body.id]);
+
+    res.send({ body: tripArr[0] });
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+
 export default router;
