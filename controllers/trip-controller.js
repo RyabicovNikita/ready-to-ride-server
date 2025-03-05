@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { pool } from "../config/db.js";
 import { DB_ERROR, SELECTED_VALUES } from "../constants/index.js";
-import { mapTrip } from "../mappers/mapTrip.js";
+import { mapTrip, mapTripCard } from "../mappers/mapTrip.js";
 
 export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) => {
   const { fromWhere, toWhere, notDriver, priceFrom, priceTo, numberPeopleFrom, dateTrip, timeTrip, numberPeopleTo } =
@@ -55,7 +55,7 @@ export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) 
   filter.addWhereCondition(toWhere, "towhere");
   filter.addWhereCondition(dateTrip, "datetime::date");
   filter.addWhereCondition(timeTrip, "datetime::time");
-  if (isNotDriverSelected) filter.addWhereCondition(notDriver ? "NULL" : -1, "driver", ">");
+  if (!isNotDriverSelected) filter.addWhereCondition(notDriver ? "NULL" : -1, "driver", ">");
   filter.addFromToCondition(priceFrom, priceTo, "totalprice");
   filter.addFromToCondition(numberPeopleFrom, numberPeopleTo, "numberpeople");
 
@@ -94,6 +94,23 @@ export const getTripsByIDs = async (arrayIDs) => {
 
   if (trips.rowCount === 0) throw Error("Не найдено");
   return trips.rows.map((trip) => mapTrip(trip));
+};
+
+export const getTrip = async (idTrip) => {
+  const trips = await pool.query(
+    `SELECT trips.*, 
+    pass.first_name AS pass_firstName, 
+    pass.last_name AS pass_lastName, 
+    driver.first_name AS driver_firstName, 
+    driver.last_name AS driver_lastName 
+    FROM trips 
+    LEFT JOIN users AS pass ON trips.created_by = pass.id 
+    LEFT JOIN users AS driver ON trips.driver = driver.id WHERE trips.id = $1`,
+    [idTrip]
+  );
+
+  if (trips.rowCount === 0) throw Error("Не найдено");
+  return trips.rows.map((trip) => mapTripCard(trip));
 };
 
 export const createTrip = async ({

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { addDriverInTrips, createTrip, getTrips, getTripsByIDs } from "../controllers/index.js";
+import { addDriverInTrips, createTrip, getTrip, getTrips, getTripsByIDs } from "../controllers/index.js";
 import auth from "../middlewares/auth.js";
 
 const router = Router({ mergeParams: true });
@@ -64,7 +64,7 @@ router.post("/confirmDriver", auth, async ({ body }, res) => {
 
 router.post("/:id", auth, async (req, res) => {
   try {
-    const tripArr = await getTripsByIDs([req.body.id]);
+    const tripArr = await getTrip(req.body.id);
 
     res.send({ body: tripArr[0] });
   } catch (e) {
