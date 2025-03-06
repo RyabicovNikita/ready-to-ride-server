@@ -7,6 +7,7 @@ export const mapTrip = (trip) => ({
   creator: {
     id: trip.created_by,
     userName: trip.pass_firstname + " " + trip.pass_lastname,
+    price: trip.passengerprice,
   },
   driver: {
     id: trip.driver,

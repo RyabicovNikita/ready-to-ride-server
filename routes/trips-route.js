@@ -23,7 +23,7 @@ router.post("/", auth, async (req, res) => {
 
 router.post("/getByIDs", auth, async ({ body }, res) => {
   const idArray = body?.idArray;
-  const responsible = await getTripsByIDs(idArray);
+  const responsible = await getTripsByIDs(idArray.map((i) => i.id));
   if (responsible.error) {
     res.status(responsible.code ?? 500).send({
       code: responsible.code ?? 500,
@@ -55,7 +55,7 @@ router.post("/new", async ({ body }, res) => {
 
 router.post("/confirmDriver", auth, async ({ body }, res) => {
   try {
-    await addDriverInTrips(body.idArray, body.driverID);
+    await addDriverInTrips(body.tripsData, body.driverID);
     res.status(200).send({});
   } catch (e) {
     res.status(500).send({ error: e.message });

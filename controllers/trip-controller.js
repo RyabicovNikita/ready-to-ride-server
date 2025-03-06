@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 import { pool } from "../config/db.js";
-import { DB_ERROR, SELECTED_VALUES } from "../constants/index.js";
+import { DB_ERROR, SELECTED_VALUES, TRIP_STATUSES } from "../constants/index.js";
 import { mapTrip, mapTripCard } from "../mappers/mapTrip.js";
 
 export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) => {
@@ -145,12 +145,21 @@ export const createTrip = async ({
   return trip;
 };
 
-export const addDriverInTrips = async (arrayIDs, driverID) => {
-  const res = await pool.query("UPDATE trips SET driver=$1 WHERE id = ANY($2)", [driverID, arrayIDs]).catch((e) => ({
-    error: e,
-  }));
-  if (res.error) {
-    if (!DB_ERROR[res.error.code]) console.error(res.error);
-    throw Error(DB_ERROR[res.error.code] || "База данных вернула некорректный ответ");
-  }
+export const addDriverInTrips = async (tripsData, driverID) => {
+  tripsData.forEach(async (trip) => {
+    const res = await pool
+      .query("UPDATE trips SET driver=$1, driverprice=$2, status=$3 WHERE id=$4", [
+        driverID,
+        trip.driverPrice,
+        TRIP_STATUSES.CORRECTED_PRICE,
+        trip.id,
+      ])
+      .catch((e) => ({
+        error: e,
+      }));
+    if (res.error) {
+      if (!DB_ERROR[res.error.code]) console.error(res.error);
+      throw Error(DB_ERROR[res.error.code] || "База данных вернула некорректный ответ");
+    }
+  });
 };
