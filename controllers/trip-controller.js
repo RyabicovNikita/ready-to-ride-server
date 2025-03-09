@@ -4,8 +4,17 @@ import { DB_ERROR, SELECTED_VALUES, TRIP_STATUSES } from "../constants/index.js"
 import { mapTrip, mapTripCard } from "../mappers/mapTrip.js";
 
 export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) => {
-  const { fromWhere, toWhere, notDriver, priceFrom, priceTo, numberPeopleFrom, dateTrip, timeTrip, numberPeopleTo } =
-    filterParams;
+  const {
+    fromWhere,
+    toWhere,
+    notDriver = "Не выбрано",
+    priceFrom,
+    priceTo,
+    numberPeopleFrom,
+    dateTrip,
+    timeTrip,
+    numberPeopleTo,
+  } = filterParams;
   const createFilter = () => {
     let counter = 1;
     let filter = "";
@@ -15,6 +24,7 @@ export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) 
         if (!value || value === SELECTED_VALUES.NOT_SELECT) return;
         if (value === "NULL") {
           filter += !filter ? ` WHERE ${bdFieldName} IS NULL` : ` AND ${bdFieldName} IS NULL`;
+
           return;
         }
         filter += !filter ? ` WHERE ${bdFieldName} ${sign} $${counter}` : ` AND ${bdFieldName} ${sign} $${counter}`;
@@ -47,7 +57,7 @@ export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) 
     };
   };
 
-  const isNotDriverSelected = notDriver !== SELECTED_VALUES.NOT_SELECT;
+  const driverFilterEmpty = notDriver === SELECTED_VALUES.NOT_SELECT;
   const filter = createFilter();
 
   filter.addWhereCondition(onlyUserTrips ? userId : null, "created_by");
@@ -55,12 +65,12 @@ export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) 
   filter.addWhereCondition(toWhere, "towhere");
   filter.addWhereCondition(dateTrip, "datetime::date");
   filter.addWhereCondition(timeTrip, "datetime::time");
-  if (!isNotDriverSelected) filter.addWhereCondition(notDriver ? "NULL" : -1, "driver", ">");
+  if (!driverFilterEmpty) filter.addWhereCondition(notDriver ? "NULL" : -1, "driver", ">");
   filter.addFromToCondition(priceFrom, priceTo, "totalprice");
   filter.addFromToCondition(numberPeopleFrom, numberPeopleTo, "numberpeople");
 
   const { userFilter, userFilterValues: valuesQuery } = filter.get();
-
+  console.log(userFilter);
   const bodyQuery = `SELECT trips.*, 
   pass.first_name AS pass_firstName, 
   pass.last_name AS pass_lastName, 
@@ -69,9 +79,9 @@ export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) 
   FROM trips 
   LEFT JOIN users AS pass ON trips.created_by = pass.id 
   LEFT JOIN users AS driver ON trips.driver = driver.id 
-  ${userFilter} ORDER BY created_at DESC
+  ${userFilter} AND trips.status <> '${TRIP_STATUSES.CANCEL}' ORDER BY created_at DESC
   `;
-
+  console.log(bodyQuery);
   const trips = await pool.query(bodyQuery, valuesQuery);
   if (onlyUserTrips && trips.rowCount === 0) return { code: 404, error: "Активных поездок нет" };
   if (trips.rowCount === 0) return { code: 404, isFilterError: true, error: "Не найдено ни одной поездки :(" };
@@ -92,7 +102,7 @@ export const getTripsByIDs = async (arrayIDs) => {
     [arrayIDs]
   );
 
-  if (trips.rowCount === 0) throw Error("Не найдено");
+  if (trips.rowCount === 0) throw Error("Поездки не найдены");
   return trips.rows.map((trip) => mapTrip(trip));
 };
 
@@ -109,7 +119,7 @@ export const getTrip = async (idTrip) => {
     [idTrip]
   );
 
-  if (trips.rowCount === 0) throw Error("Не найдено");
+  if (trips.rowCount === 0) throw Error("Такой поездки не существует");
   return trips.rows.map((trip) => mapTripCard(trip));
 };
 
@@ -162,4 +172,40 @@ export const addDriverInTrips = async (tripsData, driverID) => {
       throw Error(DB_ERROR[res.error.code] || "База данных вернула некорректный ответ");
     }
   });
+};
+
+export const confirmDriver = async (tripID, totalPrice) => {
+  const res = await pool
+    .query("UPDATE trips SET status=$1,totalprice=$2 WHERE id=$3", [TRIP_STATUSES.READY, totalPrice, tripID])
+    .catch((e) => ({
+      error: e,
+    }));
+  if (res.error) {
+    if (!DB_ERROR[res.error.code]) console.error(res.error);
+    throw Error(DB_ERROR[res.error.code] || "База данных вернула некорректный ответ");
+  }
+};
+
+export const cancelTrip = async (tripID) => {
+  const res = await pool
+    .query("UPDATE trips SET status=$1, driver=NULL WHERE id=$2", [TRIP_STATUSES.CANCEL, tripID])
+    .catch((e) => ({
+      error: e,
+    }));
+  if (res.error) {
+    if (!DB_ERROR[res.error.code]) console.error(res.error);
+    throw Error(DB_ERROR[res.error.code] || "База данных вернула некорректный ответ");
+  }
+};
+
+export const looseDriver = async (tripID) => {
+  const res = await pool
+    .query("UPDATE trips SET status=$1, driver=NULL, totalprice=0 WHERE id=$2", [TRIP_STATUSES.NEW, tripID])
+    .catch((e) => ({
+      error: e,
+    }));
+  if (res.error) {
+    if (!DB_ERROR[res.error.code]) console.error(res.error);
+    throw Error(DB_ERROR[res.error.code] || "База данных вернула некорректный ответ");
+  }
 };

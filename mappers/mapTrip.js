@@ -9,6 +9,7 @@ export const mapTrip = (trip) => ({
     userName: trip.pass_firstname + " " + trip.pass_lastname,
     price: trip.passengerprice,
   },
+  status: trip.status,
   driver: {
     id: trip.driver,
     userName: trip.driver_lastname ? trip.driver_firstname + " " + trip.driver_lastname : trip.driver_lastname,
