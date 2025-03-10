@@ -10,11 +10,15 @@ import {
   looseDriver,
 } from "../controllers/index.js";
 import auth from "../middlewares/auth.js";
+import checkUserAccess from "../middlewares/checkUserAccess.js";
+import { DRIVER_BREADCRUMBS, PASS_BREADCRUMBS } from "../constants/breadcrumbs.js";
+
+const { DELETE_DRIVER_FROM_TRIP, NEW_TRIP, CANCEL_TRIP, CONFIRM_DRIVER_TRIP } = PASS_BREADCRUMBS;
+const { CONFIRM_TRIPS } = DRIVER_BREADCRUMBS;
 
 const router = Router({ mergeParams: true });
 
-router.post("/looseDriver", auth, async (req, res) => {
-  console.log("??");
+router.post(DELETE_DRIVER_FROM_TRIP, auth, checkUserAccess(DELETE_DRIVER_FROM_TRIP), async (req, res) => {
   try {
     await looseDriver(req.body.id);
 
@@ -39,7 +43,7 @@ router.post("/getByIDs", auth, async ({ body }, res) => {
   }
 });
 
-router.post("/new", async ({ body }, res) => {
+router.post(NEW_TRIP, auth, checkUserAccess(NEW_TRIP), async ({ body }, res) => {
   try {
     const newTrip = await createTrip({
       fromWhere: body.fromWhere,
@@ -56,16 +60,7 @@ router.post("/new", async ({ body }, res) => {
   }
 });
 
-router.post("/addDriverInTrips", auth, async ({ body }, res) => {
-  try {
-    await addDriverInTrips(body.tripsData, body.driverID);
-    res.status(200).send({});
-  } catch (e) {
-    res.status(500).send({ error: e.message });
-  }
-});
-
-router.post("/confirmDriver", auth, async ({ body }, res) => {
+router.post(CONFIRM_DRIVER_TRIP, auth, checkUserAccess(CONFIRM_DRIVER_TRIP), async ({ body }, res) => {
   try {
     await confirmDriver(body.id, body.totalPrice);
     res.status(200).send({});
@@ -74,7 +69,16 @@ router.post("/confirmDriver", auth, async ({ body }, res) => {
   }
 });
 
-router.post("/cancelTrip", auth, async (req, res) => {
+router.post(CONFIRM_TRIPS, auth, checkUserAccess(CONFIRM_TRIPS), async ({ body }, res) => {
+  try {
+    await addDriverInTrips(body.tripsData, body.driverID);
+    res.status(200).send({});
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+
+router.post(CANCEL_TRIP, auth, checkUserAccess(CANCEL_TRIP), async (req, res) => {
   try {
     await cancelTrip(req.body.id);
 

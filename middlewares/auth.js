@@ -12,7 +12,7 @@ async function auth(req, res, next) {
   try {
     const tokenData = verifyToken(req.cookies.token, ACCESS_SECRET_KEY);
 
-    const user = pool.query("SELECT * FROM users WHERE id = $1", [tokenData.userId]);
+    const user = pool.query("SELECT * FROM users WHERE id = $1", [tokenData.id]);
     if (!user) {
       res.send({ error: ERRORS.NOT_AUTH });
       return;

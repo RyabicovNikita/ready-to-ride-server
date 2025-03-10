@@ -3,10 +3,11 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-export const generateJWT = (userId, secret, expirationTime) =>
+export const generateJWT = ({ id, isdriver }, secret, expirationTime) =>
   jwt.sign(
     {
-      userId,
+      id,
+      isDriver: isdriver,
     },
     secret,
     { expiresIn: expirationTime }
