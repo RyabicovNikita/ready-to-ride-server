@@ -4,21 +4,26 @@ import {
   cancelTrip,
   confirmDriver,
   createTrip,
+  deleteTrip,
   getTrip,
   getTrips,
   getTripsByIDs,
   looseDriver,
+  updateTrip,
 } from "../controllers/index.js";
 import auth from "../middlewares/auth.js";
 import checkUserAccess from "../middlewares/checkUserAccess.js";
 import { DRIVER_BREADCRUMBS, PASS_BREADCRUMBS } from "../constants/breadcrumbs.js";
+import { hasRole } from "../middlewares/hasRole.js";
+import ROLES from "../constants/roles.js";
 
-const { DELETE_DRIVER_FROM_TRIP, NEW_TRIP, CANCEL_TRIP, CONFIRM_DRIVER_TRIP } = PASS_BREADCRUMBS;
+const { DELETE_DRIVER_FROM_TRIP, NEW_TRIP, CANCEL_TRIP, CONFIRM_DRIVER_TRIP, UPDATE_TRIP, DELETE_TRIP, GET_TRIP } =
+  PASS_BREADCRUMBS;
 const { CONFIRM_TRIPS } = DRIVER_BREADCRUMBS;
 
 const router = Router({ mergeParams: true });
 
-router.post(DELETE_DRIVER_FROM_TRIP, auth, checkUserAccess(DELETE_DRIVER_FROM_TRIP), async (req, res) => {
+router.delete(DELETE_DRIVER_FROM_TRIP, auth, checkUserAccess(DELETE_DRIVER_FROM_TRIP), async (req, res) => {
   try {
     await looseDriver(req.body.id);
 
@@ -88,9 +93,37 @@ router.post(CANCEL_TRIP, auth, checkUserAccess(CANCEL_TRIP), async (req, res) =>
   }
 });
 
-router.post("/:id", auth, async (req, res) => {
+router.post(UPDATE_TRIP, auth, checkUserAccess(UPDATE_TRIP), async (req, res) => {
   try {
-    const tripArr = await getTrip(req.body.id);
+    const data = req.body;
+    const tripID = req.params.id;
+    const updatedTrip = await updateTrip({
+      fromWhere: data.fromWhere,
+      toWhere: data.toWhere,
+      numberPeople: data.numberPeople,
+      passengerPrice: data.passengerPrice,
+      tripID,
+    });
+    res.send({ body: updatedTrip });
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+
+router.delete(DELETE_TRIP, auth, hasRole(ROLES.ADMIN, ROLES.MODERATOR), async (req, res) => {
+  try {
+    const tripID = req.params.id;
+    await deleteTrip(tripID);
+    res.send({});
+  } catch (e) {
+    res.status(500).send({ error: e.message });
+  }
+});
+
+router.get("/:id", auth, async (req, res) => {
+  try {
+    const id = req.params.id;
+    const tripArr = await getTrip(id);
 
     res.send({ body: tripArr[0] });
   } catch (e) {
