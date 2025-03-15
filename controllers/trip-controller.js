@@ -70,7 +70,7 @@ export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) 
   filter.addFromToCondition(numberPeopleFrom, numberPeopleTo, "numberpeople");
 
   const { userFilter, userFilterValues: valuesQuery } = filter.get();
-  console.log(userFilter);
+
   const bodyQuery = `SELECT trips.*, 
   pass.first_name AS pass_firstName, 
   pass.last_name AS pass_lastName, 
@@ -200,10 +200,41 @@ export const cancelTrip = async (tripID) => {
 
 export const looseDriver = async (tripID) => {
   const res = await pool
-    .query("UPDATE trips SET status=$1, driver=NULL, totalprice=0 WHERE id=$2", [TRIP_STATUSES.NEW, tripID])
+    .query("UPDATE trips SET status=$1, driver=NULL, totalprice=0, driverprice=0 WHERE id=$2", [
+      TRIP_STATUSES.NEW,
+      tripID,
+    ])
     .catch((e) => ({
       error: e,
     }));
+  if (res.error) {
+    if (!DB_ERROR[res.error.code]) console.error(res.error);
+    throw Error(DB_ERROR[res.error.code] || "База данных вернула некорректный ответ");
+  }
+};
+
+export const updateTrip = async ({ fromWhere, toWhere, passengerPrice, numberPeople, tripID }) => {
+  const res = await pool
+    .query("UPDATE trips SET fromwhere=$1, towhere=$2, passengerprice=$3, numberpeople=$4 WHERE id=$5", [
+      fromWhere,
+      toWhere,
+      passengerPrice,
+      numberPeople,
+      tripID,
+    ])
+    .catch((e) => ({
+      error: e,
+    }));
+  if (res.error) {
+    if (!DB_ERROR[res.error.code]) console.error(res.error);
+    throw Error(DB_ERROR[res.error.code] || "База данных вернула некорректный ответ");
+  }
+};
+
+export const deleteTrip = async (id) => {
+  const res = await pool.query("DELETE FROM trips WHERE id=$1", [id]).catch((e) => ({
+    error: e,
+  }));
   if (res.error) {
     if (!DB_ERROR[res.error.code]) console.error(res.error);
     throw Error(DB_ERROR[res.error.code] || "База данных вернула некорректный ответ");
