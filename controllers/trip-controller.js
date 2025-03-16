@@ -81,7 +81,7 @@ export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) 
   LEFT JOIN users AS driver ON trips.driver = driver.id 
   ${userFilter} AND trips.status <> '${TRIP_STATUSES.CANCEL}' ORDER BY created_at DESC
   `;
-  console.log(bodyQuery);
+
   const trips = await pool.query(bodyQuery, valuesQuery);
   if (onlyUserTrips && trips.rowCount === 0) return { code: 404, error: "Активных поездок нет" };
   if (trips.rowCount === 0) return { code: 404, isFilterError: true, error: "Не найдено ни одной поездки :(" };
@@ -141,8 +141,8 @@ export const createTrip = async ({
   if (activeUserTrips.rowCount > 0) throw Error("По данному маршруту у вас уже есть активная поездка");
   const res = await pool
     .query(
-      "INSERT INTO trips (fromwhere, towhere, datetime, passengerprice, numberpeople, created_by, status, totalprice) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *",
-      [fromWhere, toWhere, datetime, passengerPrice, numberPeople, createdBy, status, passengerPrice]
+      "INSERT INTO trips (fromwhere, towhere, datetime, passengerprice, numberpeople, created_by, status) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *",
+      [fromWhere, toWhere, datetime, passengerPrice, numberPeople, createdBy, status]
     )
     .catch((e) => ({
       error: e,

@@ -17,8 +17,7 @@ import { DRIVER_BREADCRUMBS, PASS_BREADCRUMBS } from "../constants/breadcrumbs.j
 import { hasRole } from "../middlewares/hasRole.js";
 import ROLES from "../constants/roles.js";
 
-const { DELETE_DRIVER_FROM_TRIP, NEW_TRIP, CANCEL_TRIP, CONFIRM_DRIVER_TRIP, UPDATE_TRIP, DELETE_TRIP, GET_TRIP } =
-  PASS_BREADCRUMBS;
+const { DELETE_DRIVER_FROM_TRIP, NEW_TRIP, CANCEL_TRIP, CONFIRM_DRIVER_TRIP, TRIP } = PASS_BREADCRUMBS;
 const { CONFIRM_TRIPS } = DRIVER_BREADCRUMBS;
 
 const router = Router({ mergeParams: true });
@@ -65,7 +64,7 @@ router.post(NEW_TRIP, auth, checkUserAccess(NEW_TRIP), async ({ body }, res) => 
   }
 });
 
-router.post(CONFIRM_DRIVER_TRIP, auth, checkUserAccess(CONFIRM_DRIVER_TRIP), async ({ body }, res) => {
+router.patch(CONFIRM_DRIVER_TRIP, auth, checkUserAccess(CONFIRM_DRIVER_TRIP), async ({ body }, res) => {
   try {
     await confirmDriver(body.id, body.totalPrice);
     res.status(200).send({});
@@ -83,7 +82,7 @@ router.post(CONFIRM_TRIPS, auth, checkUserAccess(CONFIRM_TRIPS), async ({ body }
   }
 });
 
-router.post(CANCEL_TRIP, auth, checkUserAccess(CANCEL_TRIP), async (req, res) => {
+router.patch(CANCEL_TRIP, auth, checkUserAccess(CANCEL_TRIP), async (req, res) => {
   try {
     await cancelTrip(req.body.id);
 
@@ -93,7 +92,7 @@ router.post(CANCEL_TRIP, auth, checkUserAccess(CANCEL_TRIP), async (req, res) =>
   }
 });
 
-router.post(UPDATE_TRIP, auth, checkUserAccess(UPDATE_TRIP), async (req, res) => {
+router.patch(TRIP, auth, checkUserAccess(TRIP), async (req, res) => {
   try {
     const data = req.body;
     const tripID = req.params.id;
@@ -110,7 +109,7 @@ router.post(UPDATE_TRIP, auth, checkUserAccess(UPDATE_TRIP), async (req, res) =>
   }
 });
 
-router.delete(DELETE_TRIP, auth, hasRole(ROLES.ADMIN, ROLES.MODERATOR), async (req, res) => {
+router.delete(TRIP, auth, hasRole(ROLES.ADMIN, ROLES.MODERATOR), async (req, res) => {
   try {
     const tripID = req.params.id;
     await deleteTrip(tripID);
@@ -120,7 +119,7 @@ router.delete(DELETE_TRIP, auth, hasRole(ROLES.ADMIN, ROLES.MODERATOR), async (r
   }
 });
 
-router.get("/:id", auth, async (req, res) => {
+router.get(TRIP, auth, async (req, res) => {
   try {
     const id = req.params.id;
     const tripArr = await getTrip(id);
