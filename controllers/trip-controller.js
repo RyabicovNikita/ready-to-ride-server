@@ -79,7 +79,7 @@ export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) 
   FROM trips 
   LEFT JOIN users AS pass ON trips.created_by = pass.id 
   LEFT JOIN users AS driver ON trips.driver = driver.id 
-  ${userFilter} AND trips.status <> '${TRIP_STATUSES.CANCEL}' ORDER BY created_at DESC
+  ${userFilter ? userFilter + " AND" : "WHERE"}  trips.status <> '${TRIP_STATUSES.CANCEL}' ORDER BY created_at DESC
   `;
 
   const trips = await pool.query(bodyQuery, valuesQuery);
