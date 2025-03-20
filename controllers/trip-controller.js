@@ -2,7 +2,7 @@ import { DateTime } from "luxon";
 import { pool } from "../config/db.js";
 import { DB_ERROR, SELECTED_VALUES, TRIP_STATUSES } from "../constants/index.js";
 import { mapTrip, mapTripCard } from "../mappers/mapTrip.js";
-import { mapComment } from "../mappers/mapComment.js";
+import { getTripComments } from "./comment-controller.js";
 
 export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) => {
   const {
@@ -105,27 +105,6 @@ export const getTripsByIDs = async (arrayIDs) => {
 
   if (trips.rowCount === 0) throw Error("Поездки не найдены");
   return trips.rows.map((trip) => mapTrip(trip));
-};
-
-const getChildrenComments = async (tripID, parentID) => {
-  const childrens = await pool.query("SELECT * from comments WHERE trip_id = $1 AND parent_id = $2", [tripID, parentID]);
-  if (childrens.rowCount === 0) return [];
-  return childrens.map((i) => mapComment(i));
-};
-
-const getTripComments = async (tripID) => {
-  const comments = await pool.query("SELECT * from comments WHERE trip_id = $1", [tripID]);
-  if (comments.rowCount === 0) return [];
-  if (comments.rows.some((i) => i.parent_id !== null)) {
-    const parentComments = comments.rows.filter((i) => i.parent_id === null);
-    const commentsWithChildrensData = [];
-    parentComments.forEach(async (comment) => {
-      const childrens = await getChildrenComments(tripID, comment.id);
-      commentsWithChildrensData.push({ ...comment, childrenComments: childrens });
-    });
-
-    return commentsWithChildrensData;
-  } else return comments.rows;
 };
 
 export const getTrip = async (tripID) => {
