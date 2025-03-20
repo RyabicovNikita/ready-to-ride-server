@@ -2,6 +2,7 @@ import { DateTime } from "luxon";
 import { pool } from "../config/db.js";
 import { DB_ERROR, SELECTED_VALUES, TRIP_STATUSES } from "../constants/index.js";
 import { mapTrip, mapTripCard } from "../mappers/mapTrip.js";
+import { mapComment } from "../mappers/mapComment.js";
 
 export const getTrips = async ({ onlyUserTrips, userId, filter: filterParams }) => {
   const {
@@ -106,7 +107,28 @@ export const getTripsByIDs = async (arrayIDs) => {
   return trips.rows.map((trip) => mapTrip(trip));
 };
 
-export const getTrip = async (idTrip) => {
+const getChildrenComments = async (tripID, parentID) => {
+  const childrens = await pool.query("SELECT * from comments WHERE trip_id = $1 AND parent_id = $2", [tripID, parentID]);
+  if (childrens.rowCount === 0) return [];
+  return childrens.map((i) => mapComment(i));
+};
+
+const getTripComments = async (tripID) => {
+  const comments = await pool.query("SELECT * from comments WHERE trip_id = $1", [tripID]);
+  if (comments.rowCount === 0) return [];
+  if (comments.rows.some((i) => i.parent_id !== null)) {
+    const parentComments = comments.rows.filter((i) => i.parent_id === null);
+    const commentsWithChildrensData = [];
+    parentComments.forEach(async (comment) => {
+      const childrens = await getChildrenComments(tripID, comment.id);
+      commentsWithChildrensData.push({ ...comment, childrenComments: childrens });
+    });
+
+    return commentsWithChildrensData;
+  } else return comments.rows;
+};
+
+export const getTrip = async (tripID) => {
   const trips = await pool.query(
     `SELECT trips.*, 
     pass.first_name AS pass_firstName, 
@@ -116,11 +138,11 @@ export const getTrip = async (idTrip) => {
     FROM trips 
     LEFT JOIN users AS pass ON trips.created_by = pass.id 
     LEFT JOIN users AS driver ON trips.driver = driver.id WHERE trips.id = $1`,
-    [idTrip]
+    [tripID]
   );
-
   if (trips.rowCount === 0) throw Error("Такой поездки не существует");
-  return trips.rows.map((trip) => mapTripCard(trip));
+  const comments = await getTripComments(tripID);
+  return mapTripCard(trips.rows[0], comments);
 };
 
 export const createTrip = async ({

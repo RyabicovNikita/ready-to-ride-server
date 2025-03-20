@@ -21,7 +21,7 @@ export const mapTrip = (trip) => ({
   passengersNumber: trip.numberpeople,
 });
 
-export const mapTripCard = (trip) => ({
+export const mapTripCard = (trip, comments = []) => ({
   id: trip.id,
   status: trip.status,
   created_at: formatUTCDate(trip.created_at),
@@ -41,4 +41,5 @@ export const mapTripCard = (trip) => ({
   toWhere: trip.towhere,
   passengersNumber: trip.numberpeople,
   totalPrice: trip.totalprice,
+  comments: comments,
 });

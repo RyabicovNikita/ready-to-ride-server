@@ -17,10 +17,14 @@ import { DRIVER_BREADCRUMBS, PASS_BREADCRUMBS } from "../constants/breadcrumbs.j
 import { hasRole } from "../middlewares/hasRole.js";
 import ROLES from "../constants/roles.js";
 
+import commentRoutes from "./comments-route.js";
+
 const { DELETE_DRIVER_FROM_TRIP, NEW_TRIP, CANCEL_TRIP, CONFIRM_DRIVER_TRIP, TRIP } = PASS_BREADCRUMBS;
 const { CONFIRM_TRIPS } = DRIVER_BREADCRUMBS;
 
 const router = Router({ mergeParams: true });
+
+router.use("/comments", commentRoutes);
 
 router.delete(DELETE_DRIVER_FROM_TRIP, auth, checkUserAccess(DELETE_DRIVER_FROM_TRIP), async (req, res) => {
   try {
@@ -122,9 +126,9 @@ router.delete(TRIP, auth, hasRole(ROLES.ADMIN, ROLES.MODERATOR), async (req, res
 router.get(TRIP, auth, async (req, res) => {
   try {
     const id = req.params.id;
-    const tripArr = await getTrip(id);
+    const trip = await getTrip(id);
 
-    res.send({ body: tripArr[0] });
+    res.send({ body: trip });
   } catch (e) {
     res.status(500).send({ error: e.message });
   }
