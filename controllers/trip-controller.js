@@ -153,7 +153,7 @@ export const createTrip = async ({
     throw Error(DB_ERROR[res.error.code] || "База данных вернула некорректный ответ");
   }
   const trip = res.rows[0];
-  return trip;
+  return mapTripCard(trip);
 };
 
 export const addDriverInTrips = async (tripsData, driverID) => {
@@ -230,6 +230,10 @@ export const updateTrip = async ({ fromWhere, toWhere, passengerPrice, numberPeo
     if (!DB_ERROR[res.error.code]) console.error(res.error);
     throw Error(DB_ERROR[res.error.code] || "База данных вернула некорректный ответ");
   }
+
+  const updatedTrip = await getTrip(tripID).catch((e) => ({ error: e }));
+
+  return updatedTrip;
 };
 
 export const deleteTrip = async (id) => {
