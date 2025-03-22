@@ -1,5 +1,6 @@
 import { pool } from "../config/db.js";
 import { DB_ERROR } from "../constants/dbCodeErrors.js";
+import { sortArrByCreateDate } from "../helpers/formatDate.js";
 import { mapComment } from "../mappers/mapComment.js";
 export const getTripComments = async (tripID) => {
   const comments = await pool.query(
@@ -9,7 +10,7 @@ export const getTripComments = async (tripID) => {
 
   if (comments.rowCount === 0) return [];
 
-  return comments.rows.map((i) => mapComment(i));
+  return sortArrByCreateDate(comments.rows).map((i) => mapComment(i));
 };
 
 export const addParentCommentInTrip = async (tripID, userID, text) => {
@@ -21,7 +22,7 @@ export const addParentCommentInTrip = async (tripID, userID, text) => {
             VALUES ($1, $2, $3) 
             RETURNING *
         )
-        SELECT newComment.*, users.first_name, users.last_name
+        SELECT newComment.*, users.first_name, users.last_name, users.isdriver
         FROM newComment
         JOIN users ON users.id = newComment.user_id
     `,
