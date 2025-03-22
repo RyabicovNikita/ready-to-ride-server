@@ -105,6 +105,7 @@ router.patch(TRIP, auth, checkUserAccess(TRIP), async (req, res) => {
       toWhere: data.toWhere,
       numberPeople: data.numberPeople,
       passengerPrice: data.passengerPrice,
+      datetime: data.datetime,
       tripID,
     });
     res.send({ body: updatedTrip });

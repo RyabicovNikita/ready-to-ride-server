@@ -214,13 +214,14 @@ export const looseDriver = async (tripID) => {
   }
 };
 
-export const updateTrip = async ({ fromWhere, toWhere, passengerPrice, numberPeople, tripID }) => {
+export const updateTrip = async ({ fromWhere, toWhere, passengerPrice, numberPeople, datetime, tripID }) => {
   const res = await pool
-    .query("UPDATE trips SET fromwhere=$1, towhere=$2, passengerprice=$3, numberpeople=$4 WHERE id=$5", [
+    .query("UPDATE trips SET fromwhere=$1, towhere=$2, passengerprice=$3, numberpeople=$4, datetime=$5 WHERE id=$6", [
       fromWhere,
       toWhere,
       passengerPrice,
       numberPeople,
+      datetime,
       tripID,
     ])
     .catch((e) => ({
