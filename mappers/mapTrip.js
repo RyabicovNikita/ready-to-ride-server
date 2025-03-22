@@ -3,7 +3,10 @@ import { formatUTCDate } from "../helpers/index.js";
 
 export const mapTrip = (trip) => ({
   id: trip.id,
-  created_at: formatUTCDate(trip.created_at),
+  created_at: {
+    date: formatUTCDate(trip.created_at, FORMATES_DATE.DATE),
+    time: formatUTCDate(trip.created_at, FORMATES_DATE.SHORT_TIME),
+  },
   creator: {
     id: trip.created_by,
     userName: trip.pass_firstname + " " + trip.pass_lastname,
@@ -24,7 +27,10 @@ export const mapTrip = (trip) => ({
 export const mapTripCard = (trip, comments = []) => ({
   id: trip.id,
   status: trip.status,
-  created_at: formatUTCDate(trip.created_at),
+  created_at: {
+    date: formatUTCDate(trip.created_at, FORMATES_DATE.DATE),
+    time: formatUTCDate(trip.created_at, FORMATES_DATE.SHORT_TIME),
+  },
   creator: {
     id: trip.created_by,
     userName: trip.pass_firstname + " " + trip.pass_lastname,
