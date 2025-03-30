@@ -10,6 +10,8 @@ app.use(express.json());
 
 app.use("/api", routes);
 
+app.use(express.static("../ready-to-ride-client/build"));
+
 app.get("*", (req, res) => {
   res.sendFile(path.resolve("..", "ready-to-ride-client", "build", "index.html"));
 });
