@@ -63,8 +63,6 @@ export async function updateUser({
   birthday,
   driverAuto,
 }) {
-  console.log(firstName);
-  console.log(lastName);
   const res = await pool.query(
     "UPDATE users SET first_name=$1, last_name=$2, imageurl=$3, driverauto=$4, birthday=$5 WHERE id=$6 RETURNING *",
     [firstName, lastName, imageURL, driverAuto, birthday, id]
