@@ -38,7 +38,7 @@ router.delete(DELETE_DRIVER_FROM_TRIP, auth, checkUserAccess(DELETE_DRIVER_FROM_
 
 router.post("/getByIDs", auth, async ({ body }, res) => {
   try {
-    const idArray = body?.idArray;
+    const idArray = body.idArray ?? [];
     const responsible = await getTripsByIDs(idArray.map((i) => i.id));
     if (responsible.error) {
       res.status(responsible.code ?? 500).send({

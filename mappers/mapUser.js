@@ -6,14 +6,16 @@ export const mapAuthUser = (user) => ({
   userName: user.first_name + " " + user.last_name ?? "",
   isDriver: user.isdriver,
   registed_at: formatUTCDate(user.created_at, "dd.MM.yyyy"),
+  imageUrl: user.imageurl
 });
-export const mapCardUser = (user) => ({
+export const mapFullInfoUser = (user) => ({
   email: user.email,
   role: user.role,
-  login: user.login,
   registed_at: formatUTCDate(user.created_at, "dd.MM.yyyy"),
-  image: user.imageurl,
+  birthday: user.birthday ? formatUTCDate(user.birthday, "yyyy-MM-dd") : null,
+  firstName: user.first_name,
+  lastName: user.last_name,
+  imageUrl: user.imageurl,
   isDriver: user.isDriver,
-  tripsCount: tripscount,
-  driverauto: user.driverauto,
+  driverAuto: user.driverauto,
 });
