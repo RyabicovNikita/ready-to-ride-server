@@ -14,5 +14,6 @@ export const mapComment = (comment) => ({
     firstName: comment.first_name,
     lastName: comment.last_name,
     isDriver: comment.isdriver,
+    imageUrl: comment.imageurl
   },
 });

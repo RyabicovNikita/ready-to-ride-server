@@ -4,7 +4,7 @@ import { sortArrByCreateDate } from "../helpers/formatDate.js";
 import { mapComment } from "../mappers/mapComment.js";
 export const getTripComments = async (tripID) => {
   const comments = await pool.query(
-    "SELECT comments.*, users.first_name, users.last_name, users.isdriver FROM comments JOIN users ON users.id = comments.user_id WHERE trip_id = $1",
+    "SELECT comments.*, users.first_name, users.last_name, users.isdriver, users.imageurl FROM comments JOIN users ON users.id = comments.user_id WHERE trip_id = $1",
     [tripID]
   );
 
