@@ -29,11 +29,11 @@ router.patch("/:id", auth, async (req, res) => {
 
   const userID = req.params.id;
 
-  form.on('fileBegin', (name, file) => {
+  form.on("fileBegin", (name, file) => {
     const extname = path.extname(file.originalFilename);
     const newFileName = `user-${userID}-profile-${Date.now()}${extname}`;
-    
-    file.filepath = path.join(form.uploadDir, newFileName); 
+
+    file.filepath = path.join(form.uploadDir, newFileName);
   });
 
   form.parse(req, async (err, fields, files) => {
@@ -45,7 +45,6 @@ router.patch("/:id", auth, async (req, res) => {
     const relativeFilePath = filePath
       ? filePath.replace(/^.*[\\\/]uploads[\\\/]/, "/uploads/") // Преобразуем абсолютный путь в относительный
       : null;
-
     try {
       const userData = await getUser(userID);
       if (userData.imageUrl && userData.imageUrl !== relativeFilePath) {
@@ -59,10 +58,10 @@ router.patch("/:id", auth, async (req, res) => {
 
       const updatedUser = await updateUser({
         id: userID,
-        firstName: fields.firstName[0],
-        lastName: fields.lastName[0],
-        birthday: fields.birthday[0],
-        driverAuto: fields.driverAuto[0],
+        firstName: fields.firstName?.[0],
+        lastName: fields.lastName?.[0],
+        birthday: fields.birthday?.[0],
+        driverAuto: fields.driverAuto?.[0],
         imageURL: relativeFilePath,
       });
       res.send({ body: updatedUser });
