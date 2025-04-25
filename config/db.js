@@ -10,5 +10,5 @@ export const pool = new Pool({
   // database: process.env.DB_NAME,
   // password: process.env.DB_PASSWORD,
   // port: process.env.DB_PORT,
-  
+  connectionString: `postgres://admin:Nikita_12345@db:5432/${process.env.DB_NAME}`
 });
