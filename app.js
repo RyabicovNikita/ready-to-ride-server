@@ -13,15 +13,14 @@ const app = express();
 app.use(cookieParser());
 app.use(express.json());
 
-app.use("/api", routes);
-
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use(express.static("../ready-to-ride-client/build"));
+
+app.use("/api", routes);
 
 app.get("*", (req, res) => {
   res.sendFile(path.resolve("..", "ready-to-ride-client", "build", "index.html"));
 });
-
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
