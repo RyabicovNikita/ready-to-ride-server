@@ -64,7 +64,7 @@ export async function updateUser({
   driverAuto,
 }) {
   const res = await pool.query(
-    "UPDATE users SET first_name=$1, last_name=$2, imageurl=$3, driverauto=$4, birthday=$5 WHERE id=$6 RETURNING *",
+    "UPDATE users SET first_name=$1, last_name=$2, imageurl=$3, drivercar=$4, birthday=$5 WHERE id=$6 RETURNING *",
     [firstName, lastName, imageURL, driverAuto, birthday, id]
   ) .catch((e) => ({
     error: e,
