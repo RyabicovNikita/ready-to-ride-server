@@ -22,7 +22,7 @@ export const addParentCommentInTrip = async (tripID, userID, text) => {
             VALUES ($1, $2, $3) 
             RETURNING *
         )
-        SELECT newComment.*, users.first_name, users.last_name, users.isdriver
+        SELECT newComment.*, users.first_name, users.last_name, users.isdriver, users.imageurl
         FROM newComment
         JOIN users ON users.id = newComment.user_id
     `,
